@@ -197,7 +197,7 @@ app = web.application(urls, globals())
 
 class Frequency:
     def GET(self):
-        web.header('Access-Control-Allow-Origin', '*')
+        #web.header('Access-Control-Allow-Origin', '*')
         web.header('Content-Type', 'application/json')
         wordList = web.input(_method='get')["words"]
         words = wordList.split(":")
@@ -211,7 +211,7 @@ class Start:
 
 class Query:
     def GET(self):
-        web.header('Access-Control-Allow-Origin', '*')
+        #web.header('Access-Control-Allow-Origin', '*')
         web.header('Content-Type', 'application/json')
         wordList = web.input(_method='get')["words"]
         ordered = int(web.input(_method='get')["ordered"])
