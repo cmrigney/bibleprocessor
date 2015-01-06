@@ -3,6 +3,17 @@ from pymongo import MongoClient
 from bson.code import Code
 import json
 
+def doWordFreq(word):
+    client = MongoClient();
+
+    collection = client.bible_database.word_count
+
+    item = collection.find_one({"_id": word})
+    if item == None:
+        return { "count" : 0 }
+
+    return { "count": item["value"] }
+
 def doFrequencyFollowingQuery(words):
     client = MongoClient();
 
@@ -191,9 +202,17 @@ def doUnorderedQuery(words):
 urls = (
     '/', 'Start',
     '/w/?', 'Query',
-    '/freq/?', 'Frequency'
+    '/freq/?', 'Frequency',
+    '/wc/?', 'WordCount',
 )
 app = web.application(urls, globals())
+
+class WordCount:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        word = web.input(_method='get')["word"]
+        data = doWordFreq(word)
+        return json.dumps(data)
 
 class Frequency:
     def GET(self):
