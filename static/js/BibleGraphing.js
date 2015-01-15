@@ -152,12 +152,18 @@ function nodeSelected(properties) {
   viewModel.loadingNetworkVerses(true);
 
   viewModel.interactionString(words.replace(/:/g, ' '));
-
-  $.getJSON('/w/?ordered=1&words=' + words, function (data) {
+  viewModel.canLoadMoreNetworkVerses(false);
+  viewModel.networkVerses([]);
+  $.getJSON('/w/?ordered=1&limit=6&words=' + words, function (data) {
             viewModel.loadingNetworkVerses(false);
             $("#networkVerseDiv").hide();
-			viewModel.networkVerses(data.slice(0, 50));
-			$("#networkVerseDiv").slideDown(2500);
+            if(data.length > 5) {
+                viewModel.canLoadMoreNetworkVerses(true);
+            }
+			viewModel.networkVerses(data.slice(0, 5));
+			window.location.hash = '';
+			window.location.hash = "#versesBody";
+			$("#networkVerseDiv").slideDown(1500);
 
 		});
 

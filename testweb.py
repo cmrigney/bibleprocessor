@@ -1,10 +1,34 @@
 import web
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from bson.code import Code
 import json
 
+def doGetCrossRefs(book, chapter, verse, limit):
+    client = MongoClient()
+    collection = client.bible_database.bible_flat
+    item = collection.find_one({"Book": book, "Chapter": chapter, "Verse": verse})
+    if item == None:
+        return None
+
+    result = []
+
+    #only top 5
+    for ref in item["Refs"][:limit]:
+        r = collection.find_one({"Book": ref["Book"], "Chapter": ref["Chapter"], "Verse": ref["Verse"]})
+        result.append({"Book": ref["Book"], "Chapter": ref["Chapter"], "Verse": ref["Verse"], "Text": r["Text"]})
+
+    return result
+
+def doGetBibleBook(book, chapter):
+    client = MongoClient()
+    collection = client.bible_database.bible_flat
+    maxChapter = client.bible_database.bible_book_meta.find_one({"Book": book})["ChapterCount"]
+    items = collection.find({"Book": book, "Chapter": chapter}).sort([("Chapter", ASCENDING), ("Verse", ASCENDING)])
+    return { "values": [{"Chapter" : itm["Chapter"], "Verse" : itm["Verse"], "Text" : itm["Text"]} for itm in items],
+             "meta": { "MaxChapter": maxChapter } }
+
 def doWordFreq(word):
-    client = MongoClient();
+    client = MongoClient()
 
     collection = client.bible_database.word_count
 
@@ -78,7 +102,7 @@ function(key, values) {
 
     return results;
 
-def doOrderedQuery(words):
+def doOrderedQuery(words, limit):
     client = MongoClient()
 
     map = Code("""
@@ -126,9 +150,9 @@ function(key, values) {
         dat["Scripture"]["text"] = obj["value"]["text"];
         res.append(dat)
 
-    return res
+    return res[:limit]
 
-def doUnorderedQuery(words):
+def doUnorderedQuery(words, limit):
     wordCount = len(words)
 
     client = MongoClient()
@@ -195,7 +219,7 @@ def doUnorderedQuery(words):
         elif (obj["value"] != None) and ("Words" in obj["value"]):
             res.append({"Scripture": obj["_id"], "Words": obj["value"]["Words"]})
 
-    return res
+    return res[:limit]
 
 #########
 
@@ -204,8 +228,28 @@ urls = (
     '/w/?', 'Query',
     '/freq/?', 'Frequency',
     '/wc/?', 'WordCount',
+    '/getbook/?', 'RetreiveBook',
+    '/crossrefs/?', 'CrossRefs',
 )
 app = web.application(urls, globals())
+
+class CrossRefs:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        book = web.input(_method='get')["book"]
+        chapter = int(web.input(_method='get')["chapter"])
+        verse = int(web.input(_method='get')["verse"])
+        limit = int(web.input(_method='get')["limit"])
+        data = doGetCrossRefs(book, chapter, verse, limit)
+        return json.dumps(data)
+
+class RetreiveBook:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        book = web.input(_method='get')["book"]
+        chapter = web.input(_method='get')["chapter"]
+        data = doGetBibleBook(book, int(chapter))
+        return json.dumps(data)
 
 class WordCount:
     def GET(self):
@@ -234,14 +278,15 @@ class Query:
         web.header('Content-Type', 'application/json')
         wordList = web.input(_method='get')["words"]
         ordered = int(web.input(_method='get')["ordered"])
+        limit = int(web.input(_method='get')["limit"])
         words = wordList.split(":")
         print words
         if ordered:
             print 'Ordered'
-            data = doOrderedQuery(words)
+            data = doOrderedQuery(words, limit)
         else:
             print 'Unordered'
-            data = doUnorderedQuery(words)
+            data = doUnorderedQuery(words, limit)
         return json.dumps(data)
 
 if __name__ == "__main__":

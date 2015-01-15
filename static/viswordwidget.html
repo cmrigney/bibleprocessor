@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href="dist/css/bootstrap.min.css" rel="stylesheet">
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/knockout-3.2.0.js"></script>
+		<script src="dist/js/bootstrap.min.js"></script>
+		<script src="js/spin.min.js"></script>
+		<script src="js/vis.js"></script>
+  		<link href="css/vis.css" rel="stylesheet" type="text/css" />
+		<script src="js/BibleGraphing.js"></script>
+		<script src="js/ScriptureLookupViewModel.js"></script>
+		<style type="text/css">
+			#mynetwork {
+			  width: 400px;
+			  height: 400px;
+			  border: 1px solid lightgray;
+			}
+		</style>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+</head>
+<body>
+<div id="visualizeWord" style="display: none;"></div>
+<span id="myDisp"></span>
+
+<script type="text/javascript">
+/*
+    $("#visualizeWord").change(function() {
+        $("#myDisp").text($("#visualizeWord").text());
+
+    });
+    */
+</script>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-md-4">
+			<div id="mynetwork" style="width: 100%; height: 100vh"></div>
+		</div>
+        <div class="col-md-8">
+			<div id="versesBody" style="height: 100vh; overflow: auto">
+				<h4>Search Phrase: <i data-bind="text: interactionString"></i></h4>
+				</br>
+				<div id="networkVerseDiv" data-bind="foreach: networkVerses">
+					<p>
+						<b><span data-bind="text: Scripture.book"></span>
+						<span data-bind="text: Scripture.chapter + ':' + Scripture.verse"></span></b> -
+						<span data-bind="text: Scripture.text"></span>
+					</p>
+				</div>
+				<div data-bind="visible: loadingNetworkVerses">
+					<div id="networkLoader" style="position:relative; height: 100px">
+					</div>
+				</div>
+				<div data-bind="visible: canLoadMoreNetworkVerses" style="text-align: center">
+					<button type="button" class="btn btn-info" data-bind="click: loadMoreVerses">Load More</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+</body>
+</html>
