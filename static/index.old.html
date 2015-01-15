@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+<!--
+	Prologue by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Bible Lookup</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/knockout-3.2.0.js"></script>
+		<script src="js/jquery.scrolly.min.js"></script>
+		<script src="js/jquery.scrollzer.min.js"></script>
+		<script src="js/spin.min.js"></script>
+		<script src="js/vis.js"></script>
+  		<link href="css/vis.css" rel="stylesheet" type="text/css" />
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<script src="js/BibleGraphing.js"></script>
+		<script src="js/ScriptureLookupViewModel.js"></script>
+		<style type="text/css">
+			#mynetwork {
+			  width: 400px;
+			  height: 400px;
+			  border: 1px solid lightgray;
+			}
+		</style>
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-wide.css" />
+		</noscript>
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body>
+
+		<!-- Header -->
+			<div id="header" class="skel-layers-fixed">
+
+				<div class="top">
+
+					<!-- Logo -->
+						<div id="logo">
+							<span class="image avatar48"><img src="images/avatar.jpg" alt="" /></span>
+							<h1 id="title">Bible Lookup</h1>
+							<p></p>
+						</div>
+
+					<!-- Nav -->
+						<nav id="nav">
+							<!--
+							
+								Prologue's nav expects links in one of two formats:
+								
+								1. Hash link (scrolls to a different section within the page)
+								
+								   <li><a href="#foobar" id="foobar-link" class="icon fa-whatever-icon-you-want skel-layers-ignoreHref"><span class="label">Foobar</span></a></li>
+
+								2. Standard link (sends the user to another page/site)
+
+								   <li><a href="http://foobar.tld" id="foobar-link" class="icon fa-whatever-icon-you-want"><span class="label">Foobar</span></a></li>
+							
+							-->
+							<ul>
+								<li><a href="#top" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Home</span></a></li>
+								<li><a href="#portfolio" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-th">Lookup</span></a></li>
+								<li><a href="#stats" id="stats-link" class="skel-layers-ignoreHref"><span class="icon fa-user">Statistics</span></a></li>
+								<li><a href="#interaction" id="iteraction-link" class="skel-layers-ignoreHref"><span class="icon fa-user">Interaction</span></a></li>
+								<li><a href="#contact" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-envelope">Contact</span></a></li>
+							</ul>
+						</nav>
+						
+				</div>
+				
+				<div class="bottom">
+
+					<!-- Social Icons -->
+						<ul class="icons">
+							<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon fa-github"><span class="label">Github</span></a></li>
+							<li><a href="#" class="icon fa-dribbble"><span class="label">Dribbble</span></a></li>
+							<li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
+						</ul>
+				
+				</div>
+			
+			</div>
+
+		<!-- Main -->
+			<div id="main">
+
+				<!-- Intro -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt">Welcome to <strong>Bible Lookup</strong></h2>
+								<p>A powerful tool for viewing the beautiful connectedness of God's Word..</p>
+							</header>
+							
+							<footer>
+								<a class="button scrolly" href="#" data-bind="click: getRelatedVerses">Get Related Verses</a>
+							</footer>
+
+						</div>
+					</section>
+					
+				<!-- Portfolio -->
+					<section id="portfolio" class="two">
+						<div class="container">
+					
+							<header>
+								<h2>Lookup</h2>
+							</header>
+							
+							<form>
+								<div class="row">
+									<label for="selectType">Choose search method</label>
+									<select id = "selectType">
+    									<option value="0">Containing the words</option>
+										<option value="1">Contains the phrase exactly</option>
+									</select>
+								</div>
+							<div class="row">
+							  <label for="searchTermsInput">Enter Search Terms</label>
+							  <input id ="searchTermsInput" class="u-full-width" type="text" placeholder="Enter Search Words Separated by a Space" data-bind="value: searchTerm">
+							</div>
+							</form>
+
+							<br/>
+
+							<div id="verseLocation" data-bind="foreach: relatedVerses">
+								<b data-bind="text: Scripture.book + ' ' + Scripture.chapter + ':' + Scripture.verse"></b>
+								<p data-bind="text: Scripture.text"></p>
+							</div>
+
+						</div>
+					</section>
+
+					<section id="stats" class="three">
+						<div class="container">
+							<header>
+								<h2>Statistics</h2>
+							</header>
+							<input type="text" id="statWord" data-bind="value: statsOfWord" placeholder="Jesus" />
+							</br>
+							</br>
+							<a class="button scrolly" href="#" data-bind="click: getWordStats">Submit</a>
+							</br>
+
+							<div id="statsData" data-bind="visible: statsView">
+								<h4>Word: </h4> <p data-bind="text: statsOfWord"></p>
+								<p data-bind="text: 'Times used: ' + statsView().count"></p>
+							</div>
+						</div>
+
+					</section>
+
+				<!-- interaction -->
+					<section id="interaction" class="three">
+						<div class="container">
+
+							<header>
+								<h2>Interaction</h2>
+								</br>
+									<input type="text" id="firstWord" data-bind="value: wordOfNetwork" placeholder="Jesus" />
+								</br>
+								</br>
+									<a class="button scrolly" href="#" data-bind="click: resetNetworkWithWord">Visualize With Word</a>
+								</br>
+								</br>
+
+								<i><h4 data-bind="text: interactionString"></h4></i>
+							</header>
+
+
+							<div id="mynetwork" style="width: 100%; height: 400px"></div>
+							<div data-bind="visible: loadingNetworkVerses">
+							<div id="networkLoader" style="position:relative; height: 100px">
+							</div>
+							</div>
+							</br>
+							<div id="networkVerseDiv" data-bind="foreach: networkVerses">
+								<p data-bind="text: Scripture.book + ' ' + Scripture.chapter + ':' + Scripture.verse + ' - ' + Scripture.text">
+								</p>
+							</div>
+						</div>
+					</section>
+			
+				<!-- Contact -->
+					<section id="contact" class="four">
+						<div class="container">
+
+							<header>
+								<h2>Contact</h2>
+							</header>
+
+							<p>Elementum sem parturient nulla quam placerat viverra 
+							mauris non cum elit tempus ullamcorper dolor. Libero rutrum ut lacinia 
+							donec curae mus. Eleifend id porttitor ac ultricies lobortis sem nunc 
+							orci ridiculus faucibus a consectetur. Porttitor curae mauris urna mi dolor.</p>
+							
+							<form method="post" action="#">
+								<div class="row 50%">
+									<div class="6u"><input type="text" name="name" placeholder="Name" /></div>
+									<div class="6u"><input type="text" name="email" placeholder="Email" /></div>
+								</div>
+								<div class="row 50%">
+									<div class="12u">
+										<textarea name="message" placeholder="Message"></textarea>
+									</div>
+								</div>
+								<div class="row">
+									<div class="12u">
+										<input type="submit" value="Send Message" />
+									</div>
+								</div>
+							</form>
+
+						</div>
+					</section>
+			
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+				
+				<!-- Copyright -->
+					<ul class="copyright">
+						<li>&copy; Untitled. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+					</ul>
+				
+			</div>
+
+	</body>
+</html>
