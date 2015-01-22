@@ -50,6 +50,7 @@ def importAsTree():
 
 def importAsFlat():
     flatBookCollection.create_index([("BookNumber", ASCENDING), ("Chapter", ASCENDING), ("Verse", ASCENDING)])
+    flatBookCollection.create_index([("Book", ASCENDING), ("Chapter", ASCENDING), ("Verse", ASCENDING)])
     flatBookCollection.create_index([("Text", TEXT)], default_language='english')
     for i in xrange(0, len(books)):
         lastChapter = -1

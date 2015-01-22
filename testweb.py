@@ -2,6 +2,16 @@ import web
 from pymongo import MongoClient, ASCENDING
 from bson.code import Code
 import json
+from bson import json_util
+from datetime import datetime
+
+def insertUserEntity(userid, type, meta):
+    client = MongoClient()
+    collection = client.bible_database.user_entities
+    curDt = datetime.utcnow()
+    obj = {"UserId": userid, "Type": type, "Created": curDt, "LastUpdated": curDt, "Meta": meta}
+    collection.insert(obj)
+    return obj
 
 def doGetCrossRefs(book, chapter, verse, limit):
     client = MongoClient()
@@ -230,8 +240,15 @@ urls = (
     '/wc/?', 'WordCount',
     '/getbook/?', 'RetreiveBook',
     '/crossrefs/?', 'CrossRefs',
+    '/entities/', 'EntityData'
 )
 app = web.application(urls, globals())
+
+class EntityData:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        data = insertUserEntity(1234, 'Person', {"FirstName": "Jon", "LastName": "Drokin"})
+        return json.dumps(data, default=json_util.default)
 
 class CrossRefs:
     def GET(self):
