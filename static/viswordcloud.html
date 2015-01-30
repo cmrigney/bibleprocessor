@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<script src="js/d3.js"></script>
+<script src="js/d3.layout.cloud.js"></script>
+<script src="js/jquery.min.js"></script>
+<script>
+
+var drawCloud = function(wds) {
+  var fill = d3.scale.category20();
+  d3.layout.cloud().size([960, 600])
+      .words(wds.map(function(d) {
+        return {text: d.word, size: d.count * 10};
+      }))
+      .padding(5)
+      .rotate(function() { return ~~(Math.random() * 2) * 90; })
+      .font("Impact")
+      .fontSize(function(d) { return d.size; })
+      .on("end", draw)
+      .start();
+
+  function draw(words) {
+    d3.select("#vis").append("svg")
+        .attr("width", 960)
+        .attr("height", 600)
+      .append("g")
+        .attr("transform", "translate(480,300)")
+      .selectAll("text")
+        .data(words)
+      .enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .on("click", function(d) {
+        })
+        .text(function(d) { return d.text; });
+  }
+}
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+$(function () {
+    var book = getUrlParameter('book');
+    var chapter = getUrlParameter('chapter');
+
+    $.getJSON('/getbook/?book=' + book + (typeof chapter !== 'undefined' ? '&chapter=' + chapter : ''), function(data) {
+        var wordList = [];
+        $.each(data.values, function (index, value) {
+            var verse = value.Text;
+            var newWords = verse.split(/\W+/);
+            $.each(newWords, function (i, v) {
+                v = v.trim();
+                v = toTitleCase(v);
+                if(v != '' && $.inArray(v, ['The', 'In', 'That', 'To', 'Is', 'We', 'He', 'Ye', 'Be', 'You', 'And', 'Of', 'His', 'Which', 'Us', 'All', 'With', 'As', 'But', 'I', 'It', 'Hath', 'May', 'Might', 'By', 'Who', 'This', 'Are', 'An', 'A', 'Not', 'Which', 'This', 'Even', 'Else', 'Hast', 'Till', 'Our', 'At', 'O', 'S', 'Put', 'Did', 'How', 'Now', 'If', 'For', 'Unto', 'Or']) < 0)
+                    wordList.push(v);
+            });
+        });
+        wordList.sort();
+        var prev = '';
+        var results = []
+        for(var i = 0; i < wordList.length; i++) {
+            if(wordList[i] !== prev) {
+                results.push({word: wordList[i], count: 1});
+                prev = wordList[i];
+            }
+            else {
+                results[results.length-1].count++;
+            }
+        }
+        drawCloud(results);
+    });
+});
+
+</script>
+<style>
+    #vis text:hover { opacity: .7 !important; }
+</style>
+<div id="vis"></div>
+</body>
+</html>

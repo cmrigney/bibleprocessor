@@ -29,11 +29,55 @@ def doGetCrossRefs(book, chapter, verse, limit):
 
     return result
 
+def doTopicVerseFetch(ident):
+    client = MongoClient()
+    bibleTopicCollection = client.bible_database.bible_topics
+    bibleCollection = client.bible_database.bible_flat
+    setList = bibleTopicCollection.find_one({"_id": int(ident)})
+    result = []
+    for v in setList["Verses"]:
+        d = bibleCollection.find_one(v)
+        v["Text"] = d["Text"]
+        result.append(v)
+
+    return result;
+
+def doTopicSearch(searchText):
+    client = MongoClient()
+    bibleTopicCollection = client.bible_database.bible_topics
+    result = bibleTopicCollection.find( { "$text": { "$search": searchText } }, { "score": { "$meta": "textScore" } }).sort([('score', {"$meta": 'textScore'})])
+    data = {}
+    lst = []
+    for r in result:
+        if r["Topic"] not in data:
+            data[r["Topic"]] = []
+            lst.append({"Topic": r["Topic"], "SubTopics": data[r["Topic"]]})
+        data[r["Topic"]].append(r)
+        del r["Topic"]
+        del r["score"]
+        r["VerseCount"] = len(r["Verses"])
+        del r["Verses"]
+
+    return lst
+
 def doGetBibleBook(book, chapter):
     client = MongoClient()
     collection = client.bible_database.bible_flat
     maxChapter = client.bible_database.bible_book_meta.find_one({"Book": book})["ChapterCount"]
     items = collection.find({"Book": book, "Chapter": chapter}).sort([("Chapter", ASCENDING), ("Verse", ASCENDING)])
+    return { "values": [{"Chapter" : itm["Chapter"], "Verse" : itm["Verse"], "Text" : itm["Text"]} for itm in items],
+             "meta": { "MaxChapter": maxChapter } }
+
+def doGetBibleBookNoChapter(book):
+    client = MongoClient()
+    collection = client.bible_database.bible_flat
+
+    if book == 'All':
+        maxChapter = 0
+        items = collection.find()
+    else:
+        maxChapter = client.bible_database.bible_book_meta.find_one({"Book": book})["ChapterCount"]
+        items = collection.find({"Book": book})
     return { "values": [{"Chapter" : itm["Chapter"], "Verse" : itm["Verse"], "Text" : itm["Text"]} for itm in items],
              "meta": { "MaxChapter": maxChapter } }
 
@@ -240,9 +284,25 @@ urls = (
     '/wc/?', 'WordCount',
     '/getbook/?', 'RetreiveBook',
     '/crossrefs/?', 'CrossRefs',
-    '/entities/', 'EntityData'
+    '/entities/', 'EntityData',
+    '/topicsearch/?', 'TopicSearch',
+    '/topicverses/?', 'TopicVerses',
 )
 app = web.application(urls, globals())
+
+class TopicVerses:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        ident = web.input(_method='get')["id"]
+        data = doTopicVerseFetch(ident)
+        return json.dumps(data)
+
+class TopicSearch:
+    def GET(self):
+        web.header('Content-Type', 'application/json')
+        text = web.input(_method='get')["text"]
+        data = doTopicSearch(text)
+        return json.dumps(data)
 
 class EntityData:
     def GET(self):
@@ -264,8 +324,11 @@ class RetreiveBook:
     def GET(self):
         web.header('Content-Type', 'application/json')
         book = web.input(_method='get')["book"]
-        chapter = web.input(_method='get')["chapter"]
-        data = doGetBibleBook(book, int(chapter))
+        if "chapter" in web.input(_method='get'):
+            chapter = web.input(_method='get')["chapter"]
+            data = doGetBibleBook(book, int(chapter))
+        else:
+            data = doGetBibleBookNoChapter(book)
         return json.dumps(data)
 
 class WordCount:
