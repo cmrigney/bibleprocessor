@@ -16,7 +16,7 @@ flatBookCollection = db.bible_flat
 metaBookCollection = db.bible_book_meta
 bibleTopicCollection = db.bible_topics
 
-bible = open("/Users/crigney/Downloads/kjv12.txt", 'r').read()
+bible = open("assets/kjv12.txt", 'r').read()
 
 arr = re.split('Book [0-9][0-9]', bible)
 
@@ -77,7 +77,7 @@ def importAsFlat():
     print "Done Importing as Flat"
 
 def getVerseLookup():
-    verseFile = '/Users/crigney/Downloads/MetaV-master/CSV/Verses.csv'
+    verseFile = 'assets/MetaV/CSV/Verses.csv'
 
     verseLookup = {}
     inHeader = True
@@ -92,7 +92,7 @@ def getVerseLookup():
     return verseLookup
 
 def getBookMapping():
-    booksFile = '/Users/crigney/Downloads/MetaV-master/CSV/Books.csv'
+    booksFile = 'assets/MetaV/CSV/Books.csv'
 
     inHeader = True
     bookMapping = {}
@@ -107,8 +107,8 @@ def getBookMapping():
     return bookMapping
 
 def importMetaVCrossRef():
-    booksFile = '/Users/crigney/Downloads/MetaV-master/CSV/Books.csv'
-    crossRefFile = '/Users/crigney/Downloads/MetaV-master/CSV/CrossRefIndex.csv'
+    booksFile = 'assets/MetaV/CSV/Books.csv'
+    crossRefFile = 'assets/MetaV/CSV/CrossRefIndex.csv'
 
     inHeader = True
 
@@ -162,8 +162,8 @@ def importMetaVCrossRef():
 
 def importMetaVTopics():
     #topics has no header
-    topicsFile = '/Users/crigney/Downloads/MetaV-master/CSV/Topics.csv'
-    topicIndexesFile = '/Users/crigney/Downloads/MetaV-master/CSV/TopicIndex.csv'
+    topicsFile = 'assets/MetaV/CSV/Topics.csv'
+    topicIndexesFile = 'assets/MetaV/CSV/TopicIndex.csv'
 
     verseLookup = getVerseLookup()
     bookMapping = getBookMapping()
@@ -186,11 +186,16 @@ def importMetaVTopics():
     #print topicToVerseSet
     #print verseLookup
 
+    inHeader = True
+
     topicDict = {}
     emptyTopicCount = 0
     with open(topicsFile, 'rb') as topiccsv:
         treader = csv.reader(topiccsv, delimiter=',')
         for row in treader:
+            if inHeader:
+                inHeader = False
+                continue
             #print row
             topicId = int(row[0])
             topic = row[1].strip()
@@ -222,4 +227,7 @@ def importMetaVTopics():
     print "Done inserting topics"
     print "Empty topic count: " + str(emptyTopicCount)
 
+importAsTree()
+importAsFlat()
+importMetaVCrossRef()
 importMetaVTopics()
